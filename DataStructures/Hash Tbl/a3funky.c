@@ -1,0 +1,289 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include <string.h> //for strcpy and strcmp
+#include <ctype.h>  //for isalnum
+#define MAX_STRING_SIZE 20 //max length of a string
+#define ARRAY_SIZE 59  //best be prime
+
+typedef struct Element Element;
+struct Element{
+    char* data;
+	int count;
+    int collision;
+};
+
+Element* hashTable[ARRAY_SIZE]={NULL};
+int hash3(char* s){
+int hash = 0;
+while(*s){
+hash = 1+ (hash + *s) % (ARRAY_SIZE-1);
+s++;
+}
+return hash;
+}
+int hash2(char* s){
+    int hash = 0;
+    while(*s){
+        hash = hash + *s;
+        s++;
+    }
+    return (hash % ARRAY_SIZE);
+}
+int hash_function(int key1,int key2,int i){
+int col=0;
+int key=0;
+// int key1=0;
+// int key2=0;
+// key1=hash2(s);
+// key2=hash3(s);
+// int i=0;
+//	printf("Sticking it in Baii\n");
+	// key1= hash2(s);
+    // key2=hash3(s);
+// while(hashTable[key]!=NULL){
+key2=(i*key2);
+key=(key1+(key2))%ARRAY_SIZE;
+    // if(hashTable[key]!=NULL){
+    //     col=col++;
+    // }
+    i++;
+    return (key);
+}
+
+Element* createNewElement(char* name){
+    // TODO
+	Element* newElement=(Element*)malloc(sizeof(Element));//(Element) before malloc stops malloc returing void* instead returns 
+	//a non void address
+	newElement->data=(char*)malloc(sizeof(char)*MAX_STRING_SIZE);
+	strcpy(newElement->data,name);
+	//printf("DEBUG CHECK 1 GOOD!\n");
+    // you might want to use the function strcpy from the string package here!
+    return newElement;
+}
+
+
+// returns the element with name name or NULL if the element is not present
+Element* search (char* name){
+Element* newperson_ptr = createNewElement(name);
+int i=0;
+int key1=0;
+key1=hash2(name);
+int key2=0;
+key2=hash3(name);
+    //TODO Basic version wont iterate down the array yet just to test idea..
+	int key = hash_function(key1,key2,i);
+	int start=key;
+
+if(hashTable[key]==NULL){
+//	printf("nothing here yet stored here man\n");
+	//nothing has yet to be stored here...
+	return NULL;
+}
+	while(hashTable[key]!=NULL){//if not name and not null we know its now data...
+	if(strcmp(hashTable[key]->data,newperson_ptr->data)==0){
+//		printf("Hey Bai we're yer man!\n");
+		return hashTable[key];
+		}
+        // if(i>ARRAY_SIZE){
+        //     printf("no space\n");
+        //     return NULL;
+        // }
+    i++;
+    
+    key=hash_function(key1,key2,i);
+		
+           
+	// 		if(key==start){
+	// //		printf("Not anywhere to be seen!\n") ;
+	// 		return NULL;
+	// 		}
+	 }
+    return NULL; //if the next iteration of i = null not stored there/....
+
+	}	
+
+// assuming that no element of key name is in the list (use search first!), add element at the correct place in the list
+// NB: it would be more efficient for search to return the index where it should be stored directly, but aiming for simplicity here!
+void insert(char* name){
+   // TODO
+//    Element newperson;
+//    newperson.ElementAddress=createNewElement(name);
+//    newperson=*(newperson.ElementAddress);
+Element* newperson_ptr = createNewElement(name);
+//    newperson.ElementAddress=NULL;
+int col=0;
+int key=0;
+int i=0;
+int key1=0;
+key1=hash2(name);
+int key2=0;
+key2=hash3(name);
+   	if(search(newperson_ptr->data)!=NULL){
+	//	printf("name already stored ...\n");
+	return;//TODO ADD OR INCREMENT HERE...
+	}
+	else 
+//	printf("Sticking it in Baii\n");
+	key= hash_function(key1,key2,i);
+	if(hashTable[key]==NULL){
+	hashTable[key]=newperson_ptr;
+//        printf("key=%d\n",key);
+	//printf("FECKING WORKED\n Name Stored==%s",newperson_ptr->data);
+	//SHOULD EQUAL NEWELEMENT (GENERATE ONE HERTE)
+    return;
+	}
+	while(hashTable[key]!=NULL){
+       i++;
+     key=  hash_function(key1,key2,i);
+            col++;
+          newperson_ptr->collision=col;
+           
+		}	
+		hashTable[key]=newperson_ptr;//keep iterating down the array till it is found.
+    return;
+	}
+
+void addOrIncrement(char* name){//CHANGing this to try to include an element so count can be brought.
+    //TODO
+    
+    int i=0;
+    int key1=0;
+key1=hash2(name);
+int key2=0;
+key2=hash3(name);
+	int key=hash_function(key1,key2,i);
+	int x=0;
+	//HOW MANY OCCUPANCIES WILL ALSO NEED TO BE MENTIODED BUT DIFFERENT FUNCTION.
+	if(search(name)!=NULL){
+    while(search(name)!=NULL&&strcmp(hashTable[key]->data,name)!=0){
+        i++;
+        key=hash_function(key1,key2,i);
+
+    }
+        x= hashTable[key]->count;
+		x++;
+		hashTable[key]->count=x;
+  		//printf("added+1\n");
+
+		return;
+	}
+	else//not in the array
+	insert(name);
+        x++;
+		hashTable[key]->count=x;
+	return;
+}
+
+// prints the number of occurences, or 0 if not in the file
+void printStats(){
+    float percentage =0;
+    float capacity=ARRAY_SIZE;
+    int numterms=0;
+    int col_count=0;
+    for(int i=0;i<ARRAY_SIZE;i++){
+        if(hashTable[i]!=NULL){
+            numterms++;
+            col_count=col_count+hashTable[i]->collision;
+        }
+
+    }
+    float numterms2=numterms;//gets around / operand forLOAD
+    percentage = numterms2/capacity;
+    printf(" Capacity   :%d\n",ARRAY_SIZE);
+    printf(" Num Term   :%d\n",numterms);
+    printf(" Collisions :%d\n",col_count);
+    printf(" Load       :%.2f%c\n",percentage,37);
+    return;
+    }
+
+// }
+// }
+// function from the assignment 0
+// Reads strings of alpha numeric characters from input file. Truncates strings which are too long to string_max-1
+void next_token ( char *buf, FILE *f, int string_max ) {
+	// start by skipping any characters we're not interested in
+	buf[0] = fgetc(f);
+	while ( !isalnum(buf[0]) && !feof(f) ) { buf[0] = fgetc(f); }
+	// read string of alphanumeric characters
+	int i=1;
+	for (;;) {
+		buf[i] = fgetc(f);                // get next character from file
+		if( !isalnum(buf[i])&&buf[i]!= ' ' ) { break; } // only load letters and numbers
+		if( feof(f) ) { break; }          // file ended?
+		if( i < (string_max-1) ) { ++i; } // truncate strings that are too long
+	}
+	buf[i] = '\0'; // NULL terminate the string
+}
+
+
+//  Reads the contents of a file and adds them to the hash table - returns 1 if file was successfully read and 0 if not.
+int load_file ( char *fname ) {
+    //printf("///////////////////////////////////////\n");
+	FILE *f;
+	char buf[MAX_STRING_SIZE];
+
+	// boiler plate code to ensure we can open the file
+	f = fopen(fname, "r");	
+	if (!f) { 
+		printf("Unable to open %s\n", fname);
+		return 0; 
+	}
+	
+	// read until the end of the file
+	while ( !feof(f) ) {
+		next_token(buf, f, MAX_STRING_SIZE);
+		addOrIncrement( buf);                           //here you call your function from above!
+	}
+
+	// always remember to close your file stream
+	fclose(f);
+
+	return 1;
+}
+
+int main(){
+char* quit ="quit";
+int initcheck=50;//arbritary value!=1||0.
+char* inputname;
+inputname=(char*)malloc(sizeof(char)*MAX_STRING_SIZE);
+//char inputname[MAX_STRING_SIZE];
+initcheck=load_file("names.csv");
+if ((initcheck==0))
+{
+    printf("File loading failed try again\n");
+    return 0;
+}
+if(initcheck==1){
+    printf("File names.csv loaded\n");
+    printStats();
+    printf("Enter term to get frequency or type \"quit\" to escape\n");
+    while(strcmp(inputname,quit)!=0){
+    // printf(">>> ");
+scanf(" %[^\n]%*c", inputname);    //fgets(inputname,MAX_STRING_SIZE,stdin);
+
+    if(strcmp(inputname,quit)==0){
+        return 0;
+    }
+
+    Element* check=search(inputname);
+    if(check==NULL){
+        //printf("%s not in table\n",inputname);
+        printf(">>> %s - 0 \n",inputname);
+    }else if(check!=NULL){
+        int key1=0;
+
+        
+        int k=check->count;       
+    printf(">>> %s - %d \n",inputname,k);
+    }
+ }
+printf(">>> ");
+
+}
+
+    //then move on to addOrIncrement TICK
+    //only then worry about loading the file TICK
+    //and later again about an interactive interface
+    
+    return 0;
+}
